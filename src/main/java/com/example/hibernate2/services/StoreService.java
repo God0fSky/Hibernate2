@@ -3,6 +3,7 @@ package com.example.hibernate2.services;
 
 import com.example.hibernate2.config.AppConfiguration;
 import com.example.hibernate2.dtos.*;
+import com.example.hibernate2.mappers.ProductMapper;
 import com.example.hibernate2.models.*;
 import com.example.hibernate2.repositories.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +28,7 @@ public class StoreService {
     private final ObjectMapper objectMapper;
 
     public ProductDto addProduct(ProductDto productDto) {
-        Product product = objectMapper.convertValue(productDto, Product.class);
+        Product product = ProductMapper.INSTANCE.toProduct(productDto);
         productRepository.save(product);
         productDto.setId(product.getId());
         return productDto;
