@@ -3,7 +3,7 @@ package com.example.hibernate2.services;
 
 import com.example.hibernate2.config.AppConfiguration;
 import com.example.hibernate2.dtos.*;
-import com.example.hibernate2.mappers.ProductMapper;
+import com.example.hibernate2.mappers.*;
 import com.example.hibernate2.models.*;
 import com.example.hibernate2.repositories.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +35,7 @@ public class StoreService {
     }
 
     public ClientDto addClient(ClientDto clientDto) {
-        Client client = objectMapper.convertValue(clientDto, Client.class);
+        Client client = ClientMapper.INSTANCE.toClient(clientDto);
         clientRepository.save(client);
         clientDto.setId(client.getId());
         return clientDto;
@@ -43,7 +43,7 @@ public class StoreService {
 
     public AddressDto addAddress(AddressDto addressDto, int clientId) {
         Optional<Client> client = clientRepository.findById(clientId);
-        Address address = objectMapper.convertValue(addressDto, Address.class);
+        Address address = AddressMapper.INSTANCE.toAddress(addressDto);
         address.setClient(client.orElseThrow(
                 () ->new EntityNotFoundException("Client with id = " + clientId + " wasn`t found")
         ));
@@ -61,16 +61,15 @@ public class StoreService {
         client.getAddress().setCity(addressDto.getCity());
         client.getAddress().setStreet(addressDto.getStreet());
         client.getAddress().setHouse(addressDto.getHouse());
-        return objectMapper.convertValue(client, ClientDto.class);
+        return ClientMapper.INSTANCE.toClientDto(client);
     }
 
     public ClientDto getClientById(int id) {
         Client client = clientRepository.findById(id).orElseThrow(
                 () ->new EntityNotFoundException("Client with id = " + id + " wasn`t found")
         );
-        ClientDto clientDto = objectMapper.convertValue(client, ClientDto.class);
-        clientDto.setAddressDto(objectMapper.convertValue(client.getAddress(), AddressDto.class));
-        //не понимаю почему, но без прямого сета адресс в дтошку не передается,  time to google
+        ClientDto clientDto = ClientMapper.INSTANCE.toClientDto(client);
+        clientDto.setAddressDto(AddressMapper.INSTANCE.toAddressDto(client.getAddress()));
         return clientDto;
     }
 
@@ -78,25 +77,25 @@ public class StoreService {
         Client client = clientRepository.findById(clientId).orElseThrow(
                 () -> new EntityNotFoundException("Client with id ="  + clientId + " wasn`t found")
         );
-        /*ClientDto clientDto = objectMapper.convertValue(client, ClientDto.class);
-        clientDto.setId(client.getId());*/
-        //не хочет работать с дто, погуглить (unrecognized field...)
-        OrderDto orderDto = new OrderDto(null, client, null);
-        Order order = objectMapper.convertValue(orderDto, Order.class);
+        ClientDto clientDto = ClientMapper.INSTANCE.toClientDto(client);
+        clientDto.setId(client.getId());
+        OrderDto orderDto = new OrderDto(null, clientDto, null);
+        Order order = OrderMapper.INSTANCE.toOrder(orderDto);
         orderRepository.save(order);
-        //orderDto.setId(order.getId());
+        orderDto.setId(order.getId());
 
         List<OrderItemDto> orderItemDtos = new ArrayList<>();
         for (Integer product : products) {
             Product product1 = productRepository.findById(product).orElseThrow(
                     () -> new EntityNotFoundException("Product with id ="  + product + " wasn`t found")
             );
+            ProductDto productDto1 = ProductMapper.INSTANCE.toProductDto(product1);
             orderItemDtos.add(addOrderItem(new OrderItemDto(null, 1,
-                    product1,  order)));
+                    productDto1,  orderDto)));
         }
 
         List<OrderItem> orderItems = orderItemDtos.stream()
-                .map(o -> objectMapper.convertValue(o, OrderItem.class))
+                .map(o -> OrderItemMapper.INSTANCE.toOrderItem(o))
                 .collect(Collectors.toList());
 
         order.setOrderItems(orderItems);
@@ -105,10 +104,10 @@ public class StoreService {
     }
 
     public OrderItemDto addOrderItem(OrderItemDto orderItemDto) {
-        OrderItem orderItem = objectMapper.convertValue(orderItemDto, OrderItem.class);
+        OrderItem orderItem = OrderItemMapper.INSTANCE.toOrderItem(orderItemDto);
         orderItemRepository.save(orderItem);
         orderItemDto.setId(orderItem.getId());
-        return objectMapper.convertValue(orderItem, OrderItemDto.class);
+        return orderItemDto;
     }
 
     public ClientAndOrdersDto getClientAndOrdersById(int clientId) {
@@ -116,14 +115,12 @@ public class StoreService {
                 () -> new EntityNotFoundException("Client with id ="  + clientId + " wasn`t found")
         );
         List<Order> orders = orderRepository.findAllByClient_Id(clientId);
-        /*List<OrderDto> orderDtos = orders.stream()
-                .map(order -> objectMapper.convertValue(orders, OrderDto.class))
-                .collect(Collectors.toList());*/
-        //опять проблема с дтошкой(unrecognized field), еще раз погуглить
-        ClientAndOrdersDto clientAndOrdersDto = new ClientAndOrdersDto(client.getId(), client.getName(),
+        List<OrderDto> orderDtos = orders.stream()
+                .map(OrderMapper.INSTANCE::toOrderDto)
+                .collect(Collectors.toList());
+        return new ClientAndOrdersDto(client.getId(), client.getName(),
                 client.getEmail(), client.getPhone(),
-                objectMapper.convertValue(client.getAddress(), AddressDto.class), orders);
-        return clientAndOrdersDto;
+                AddressMapper.INSTANCE.toAddressDto(client.getAddress()), orderDtos);
     }
 
     public ClientAndIdOrdersDto getClientAndIdOrdersById(int clientId) {
@@ -135,13 +132,8 @@ public class StoreService {
         for (Order order : orders) {
             ids.add(order.getId());
         }
-        /*List<OrderDto> orderDtos = orders.stream()
-                .map(order -> objectMapper.convertValue(orders, OrderDto.class))
-                .collect(Collectors.toList());*/
-        //опять проблема с дтошкой(unrecognized field), еще раз погуглить
-        ClientAndIdOrdersDto clientAndIdOrdersDto = new ClientAndIdOrdersDto(client.getId(), client.getName(),
+        return new ClientAndIdOrdersDto(client.getId(), client.getName(),
                 client.getEmail(), client.getPhone(), ids);
-        return clientAndIdOrdersDto;
     }
 
 }

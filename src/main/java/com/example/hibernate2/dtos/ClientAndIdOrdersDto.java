@@ -19,6 +19,6 @@ public class ClientAndIdOrdersDto {
 
     private int phone;
 
-    List<Integer> list;
+    private List<Integer> list;
 
 }

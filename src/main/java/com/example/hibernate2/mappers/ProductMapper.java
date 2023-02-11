@@ -10,6 +10,6 @@ public interface ProductMapper {
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
     Product toProduct(ProductDto productDto);
-
+    ProductDto toProductDto(Product product);
 
 }

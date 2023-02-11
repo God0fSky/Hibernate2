@@ -28,20 +28,20 @@ public class Hibernate2Application {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void init() {
-        /*storeService.addProduct(new ProductDto(null, "Apple",
-                "Helps your teeth", BigDecimal.valueOf(15)));*/
-        /*storeService.addClient(new ClientDto(null, "Client1",
-                "fsgsf@gmail.com", +380984545));*/
-        /*storeService.addAddress(new AddressDto(null, "Ukraine", "Ternopil",
-                "Ternopil`ska", "House 7"), 8);*/
-        /*storeService.changeAddress(8, new AddressDto(null, "Ukraine", "Kharkiv",
+        /*storeService.addProduct(new ProductDto(null, "Banana",
+                "Helps your hearth", BigDecimal.valueOf(25)));
+        storeService.addClient(new ClientDto(null, "Client2",
+                "lolol@gmail.com", +38098345, null));
+        storeService.addAddress(new AddressDto(null, "Ukraine", "Ternopil",
+                "Ternopil`ska", "House 7"), 4);*/
+        /*storeService.changeAddress(4, new AddressDto(null, "Ukraine", "Kharkiv",
                 "Kharkiv`ska", "House 8"));*/
         /*List<Integer> products = new ArrayList<>();
-        products.add(30);
-        products.add(7);
-        storeService.addOrder(8,  products);
-        ClientAndOrdersDto clientAndOrdersDto = storeService.getClientAndOrdersById(8);
-        ClientDto clientDto = storeService.getClientById(8);
-        ClientAndIdOrdersDto clientAndIdOrdersDto = storeService.getClientAndIdOrdersById(8);*/
+        products.add(3);
+        products.add(5);
+        storeService.addOrder(4,  products);*/
+        ClientAndOrdersDto clientAndOrdersDto = storeService.getClientAndOrdersById(4);
+        ClientDto clientDto = storeService.getClientById(4);
+        ClientAndIdOrdersDto clientAndIdOrdersDto = storeService.getClientAndIdOrdersById(4);
     }
 }

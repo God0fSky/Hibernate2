@@ -16,8 +16,8 @@ public class OrderDto {
 
     private Integer id;
 
-    private Client client;
+    private ClientDto clientDto;
 
-    private List<OrderItem> orderItems      ;
+    private List<OrderItemDto> orderItemDtos;
 
 }

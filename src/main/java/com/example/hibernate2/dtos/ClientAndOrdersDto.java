@@ -23,6 +23,6 @@ public class ClientAndOrdersDto {
 
     private AddressDto addressDto;
 
-    List<Order> orderList;
+    private List<OrderDto> orderListDto;
 
 }
